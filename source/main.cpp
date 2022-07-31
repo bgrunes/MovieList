@@ -7,7 +7,7 @@
 #include "movie.h"
 
 void mapGenres(map<string, int> &genres);
-void searchByGenre(map<string, int> genres, )
+void createSearch(int genreID);
 
 int main() {
     // Main menu:
@@ -48,98 +48,25 @@ int main() {
     // Describe what movie list is and does (?)
     while (true)
     {
-    std::cout << "Please choose a genre to search the top 10 movies or type \'exit\' to end the program.\n";
+        std::cout << "Please choose a genre to search the top 10 movies or type \'exit\' to end the program.\n";
 
-    // FIXME: Change to vector<string> and loop print
-    std::cout << "Genres: Action, Adventure, Animation, Comedy, Crime, Documentary, Drama, Family, Fantasy, History, Horror, Music, Mystery, Romance, Science Fiction, TV Movie, Thriller, War, Western\n";
+        // FIXME: Change to vector<string> and loop print(?)
+        std::cout << "Genres: Action, Adventure, Animation, Comedy, Crime, Documentary, Drama, Family, Fantasy, History, Horror, Music, Mystery, Romance, Science Fiction, TV Movie, Thriller, War, Western\n";
 
-    std::string genre;
-    cin >> genre;
+        std::string genre;
+        cin >> genre;
 
-
-    // TODO: Make into function(?)
-    if (genre == "exit")
-        break;
-    else if (genre == "Action")
-    {
-
-    }
-    else if (genre == "Adventure")
-    {
-
-    }
-    else if (genre == "Animation")
-    {
-
-    }
-    else if (genre == "Comedy")
-    {
-
-    }
-    else if (genre == "Crime")
-    {
-
-    }
-    else if (genre == "Documentary")
-    {
-
-    }
-    else if (genre == "Drama")
-    {
-
-    }
-    else if (genre == "Family")
-    {
-
-    }
-    else if (genre == "Fantasy")
-    {
-
-    }
-    else if (genre == "History")
-    {
-
-    }
-    else if (genre == "Horror")
-    {
-
-    }
-    else if (genre == "Music")
-    {
-
-    }
-    else if (genre == "Mystery")
-    {
-
-    }
-    else if (genre == "Romance")
-    {
-
-    }
-    else if (genre == "Science Fiction")
-    {
-
-    }
-    else if (genre == "TV Movies")
-    {
-
-    }
-    else if (genre == "Thriller")
-    {
-
-    }
-    else if (genre == "War")
-    {
-
-    }
-    else if (genre == "Western")
-    {
-
-    }
+        if (genre == "exit")
+            break;
+        else if (genre == "Action")
+        {        
+            createSearch(genres[genre]);
+        }
     }
     return 0;
 }
 
+// searches through the GENRE.csv file to map the genre to the genre ID
 void mapGenres(map<string, int> &genres)
 {
     ifstream gFile;
@@ -153,7 +80,11 @@ void mapGenres(map<string, int> &genres)
         string num;
         string genreID;
         string genre;
+
+        // used to move the buffer over the headers 
         getline(gFile, num);
+
+        // Checks whether gFile is at the end of the file
         while (!gFile.eof())
         {
             getline(gFile, num, ',');
@@ -164,5 +95,39 @@ void mapGenres(map<string, int> &genres)
             genres[genre] = stoi(genreID);
         }
 
+    }
+}
+
+// Searches through MOVIE_GENRE.csv and MOVIE.csv to match the genre id to the film id then to the movie and its respective data
+// Uses filestreams to traverse the files
+void createSearch(int genreID)
+{
+    ifstream mgFile;
+    ifstream mFile;
+    mgFile.open("data\\MOVIE_GENRE.csv");
+
+    if (!mgFile.is_open())
+        std::cout << "ERROR: MOVIE_GENRE.csv not found\n";
+    else
+    {
+        string id;
+        vector<string> filmId;
+        string fId;
+        string gId;
+        getline(mgFile, id);
+        while (!mgFile.eof())
+        {
+            getline(mgFile,id, ',');
+            getline(mgFile, fId, ',');
+            getline(mgFile, gId, ',');
+
+            if (std::stoi(gId) == genreID)
+                filmId.push_back(fId);
+        }
+
+        for(string i : filmId)
+        {
+            std::cout << i << "\n";
+        }
     }
 }
