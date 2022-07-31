@@ -5,9 +5,10 @@
 #include <queue>
 #include <sstream>
 #include "movie.h"
+using namespace std;
 
-void mapGenres(map<string, int> &genres);
-void createSearch(int genreID);
+void mapGenres(map<string, string> &genres);
+void createSearch(string genreID);
 
 int main() {
     // Main menu:
@@ -40,20 +41,20 @@ int main() {
     // 2.
 
     // Store the matches between genres and their IDs, mapGenres function handles filestream to GENRE.csv
-    std::map<string, int> genres;
+    map<string, string> genres;
     mapGenres(genres);
 
-    std::cout << "Welcome to MovieList!" << std::endl;
+    cout << "Welcome to MovieList!" << endl;
     
     // Describe what movie list is and does (?)
     while (true)
     {
-        std::cout << "Please choose a genre to search the top 10 movies or type \'exit\' to end the program.\n";
+        cout << "Please choose a genre to search the top 10 movies or type \'exit\' to end the program.\n";
 
         // FIXME: Change to vector<string> and loop print(?)
-        std::cout << "Genres: Action, Adventure, Animation, Comedy, Crime, Documentary, Drama, Family, Fantasy, History, Horror, Music, Mystery, Romance, Science Fiction, TV Movie, Thriller, War, Western\n";
+        cout << "Genres:\nAction, Adventure, Animation, \nComedy, Crime, Documentary, \nDrama, Family, Fantasy, \nHistory, Horror, Music, \nMystery, Romance, Science Fiction, \nTV Movie, Thriller, War, Western\n";
 
-        std::string genre;
+        string genre;
         cin >> genre;
 
         if (genre == "exit")
@@ -67,15 +68,14 @@ int main() {
 }
 
 // searches through the GENRE.csv file to map the genre to the genre ID
-// Code by: Brandon Grunes
-void mapGenres(map<string, int> &genres)
+void mapGenres(map<string, string> &genres)
 {
     ifstream gFile;
 
     gFile.open("data\\GENRE.csv");
 
     if (!gFile.is_open())
-        std::cout << "ERROR: GENRE.csv not found\n";
+        cout << "ERROR: GENRE.csv not found\n";
     else
     {
         string num;
@@ -91,9 +91,9 @@ void mapGenres(map<string, int> &genres)
             getline(gFile, num, ',');
             getline(gFile, genreID, ',');
             getline(gFile, genre, ',');
-            //std::cout << num << ", " << genreID << ", " << genre << "\n";
+            //cout << num << ", " << genreID << ", " << genre << "\n";
 
-            genres[genre] = stoi(genreID);
+            genres[genre] = genreID;
         }
 
     }
@@ -101,15 +101,15 @@ void mapGenres(map<string, int> &genres)
 
 // Searches through MOVIE_GENRE.csv and MOVIE.csv to match the genre id to the film id then to the movie and its respective data
 // Uses filestreams to traverse the files
-// Code by: Brandon Grunes
-void createSearch(int genreID)
+// 
+void createSearch(string genreID)
 {
     ifstream mgFile;
     ifstream mFile;
     mgFile.open("data\\MOVIE_GENRE.csv");
 
     if (!mgFile.is_open())
-        std::cout << "ERROR: MOVIE_GENRE.csv not found\n";
+        cout << "ERROR: MOVIE_GENRE.csv not found\n";
     else
     {
         string id;
@@ -123,13 +123,23 @@ void createSearch(int genreID)
             getline(mgFile, fId, ',');
             getline(mgFile, gId, ',');
 
-            if (std::stoi(gId) == genreID)
+            if (gId == genreID)
                 filmId.push_back(fId);
         }
 
-        for(string i : filmId)
+        // Test print the filmIds to make sure filestream is working
+        for(int i = 0; i < filmId.size(); ++i)
         {
-            std::cout << i << "\n";
+            cout << filmId[i] << "\n";
         }
+    }
+
+    mFile.open("data\\MOVIE.csv");
+
+    if(!mFile.is_open())
+        cout << "ERROR: MOVIE.csv not found\n";
+    else
+    {
+        // Format of file is: ID,FILMID,TITLE,ADULT,BACKDROP_PATH,BUDGET,HOMEPAGE,IMDB_ID,ORIGINAL_LANGUAGE,ORIGINAL_TITLE,OVERVIEW,POPULARITY,POSTER_PATH,RELEASE_DATE,REVENUE,RUNTIME,VOTE_AVERAGE,VOTE_COUNT,STATUS_,TAGLINE,COLLECTIONID
     }
 }
