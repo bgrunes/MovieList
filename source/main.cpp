@@ -67,6 +67,7 @@ int main() {
 }
 
 // searches through the GENRE.csv file to map the genre to the genre ID
+// Code by: Brandon Grunes
 void mapGenres(map<string, int> &genres)
 {
     ifstream gFile;
@@ -100,6 +101,7 @@ void mapGenres(map<string, int> &genres)
 
 // Searches through MOVIE_GENRE.csv and MOVIE.csv to match the genre id to the film id then to the movie and its respective data
 // Uses filestreams to traverse the files
+// Code by: Brandon Grunes
 void createSearch(int genreID)
 {
     ifstream mgFile;
