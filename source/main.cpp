@@ -2,14 +2,13 @@
 #include <fstream>
 #include <string>
 #include <map>
-#include <queue>
-#include <sstream>
-#include "Movie.h"
+#include <chrono>
 #include "Map.h"
+#include "heap.h"
 using namespace std;
 
-void mapGenres(std::map<string, string> &genres);
-void createSearch(string genreID, Map<float, Movie> &list, vector<float> &voteAvg);
+void mapGenres(std::map<string, int> &genres);
+void createSearch(int genreID);
 
 int main() {
     // Main menu:
@@ -42,12 +41,9 @@ int main() {
     // 2.
 
     // Store the matches between genres and their IDs, mapGenres function handles filestream to GENRE.csv
-    std::map<string, string> genres;
+    std::map<string, int> genres;
     mapGenres(genres);
-
-    // List storing searched items
-    Map<float, Movie> list;
-    vector<float> voteAvg;
+    std::map<string, int>::iterator it;
 
     cout << "Welcome to MovieList!" << endl;
     
@@ -64,9 +60,14 @@ int main() {
 
         if (genre == "exit")
             break;
-        else if (genre == "Action")
+        else
         {        
-            createSearch(genres[genre], list, voteAvg);
+            it = genres.find(genre);
+            if (it != genres.end())
+                createSearch(genres[genre]);
+            else
+                cout << "Incorrect genre name.\n";
+            
         }
     }
 
@@ -76,8 +77,8 @@ int main() {
 }
 
 // searches through the GENRE.csv file to map the genre to the genre ID
-// Code by: Brandon Grunes
-void mapGenres(std::map<string, string> &genres)
+// Code by: Brandon
+void mapGenres(std::map<string, int> &genres)
 {
     ifstream gFile;
 
@@ -102,16 +103,19 @@ void mapGenres(std::map<string, string> &genres)
             getline(gFile, genre, '\n');
             //cout << num << ", " << genreID << ", " << genre << "\n";
 
-            genres[genre] = genreID;
+            genres[genre] = stoi(genreID);
+            cout << "success!\n";
         }
 
     }
+
+    gFile.close();
 }
 
 // Searches through MOVIE_GENRE.csv and MOVIE.csv to match the genre id to the film id then to the movie and its respective data
 // Uses filestreams to traverse the files
-// Code by: Brandon Grunes
-void createSearch(string genreID, Map<float, Movie> &list, vector<float> voteAvg)
+// Code by: Brandon
+void createSearch(int genreID)
 {
     ifstream mgFile;
     ifstream mFile;
@@ -120,7 +124,9 @@ void createSearch(string genreID, Map<float, Movie> &list, vector<float> voteAvg
     string fId;
     string gId;
     string title;
+    string release;
     string vote_avg;
+    string vote_ct;
 
     mgFile.open("data\\MOVIE_GENRE.csv");
 
@@ -135,24 +141,30 @@ void createSearch(string genreID, Map<float, Movie> &list, vector<float> voteAvg
             getline(mgFile, fId, ',');
             getline(mgFile, gId, ',');
 
-            if (gId == genreID)
+            if (stoi(gId) == genreID)
                 filmId.push_back(fId);
         }
 
         // Test print the filmIds to make sure filestream is working
-        for(int i = 0; i < filmId.size(); ++i)
+        /*for(int i = 0; i < filmId.size(); ++i)
         {
             cout << filmId[i] << "\n";
-        }
+        }*/
     }
-
+    mgFile.close();
     mFile.open("data\\MOVIE.csv");
+    
+    vector<Movie> movieList;
+    Heap heap;
+        
+    Map<float, Movie> list;
+    vector<float> voteAvg;
 
     if(!mFile.is_open())
         cout << "ERROR: MOVIE.csv not found\n";
     else
     {
-        // Format of file is: ID,FILMID,TITLE,VOTE_AVERAGE
+        // Format of file is: ID,FILMID,TITLE,RELEASE,VOTE_AVERAGE,VOTE_COUNT
 
         getline(mFile, num);
         while (!mFile.eof())
@@ -160,18 +172,36 @@ void createSearch(string genreID, Map<float, Movie> &list, vector<float> voteAvg
             getline(mFile, num, ',');
             getline(mFile, fId, ',');
             getline(mFile, title, ',');
-            getline(mFile, vote_avg, '\n');
+            getline(mFile, release, ',');
+            getline(mFile, vote_avg, ',');
+            getline(mFile, vote_ct, '\n');
 
+            bool checkIfTrue = false;
             for (int i = 0; i < filmId.size(); ++i)
             {
-                if (filmId[0] == fId)
+                if (filmId[i] == fId && stoi(vote_ct) > 20) 
                 {
-                    Movie movie(stoi(fId), title, stof(vote_avg));
-                    movie.printData();
-                    list.insert(stof(vote_avg), movie);
-                    voteAvg.push_back(stof(vote_avg));
+                    checkIfTrue = true;
+                    break;
                 }
             }
+
+            if (checkIfTrue)
+            {
+                // Add the movie to the Movie List Map and the Movie List Heap
+                Movie movie = Movie(stoi(fId), title, release, stof(vote_avg));
+                list.insert(stof(vote_avg), movie);
+                voteAvg.push_back(stof(vote_avg));
+                
+                movieList.push_back(movie);
+            }
         }
+
+        // Code by: Kylo
+        for (int i = 0; i < movieList.size(); i++)
+            heap.insert(movieList[i]);
+
+        cout << "HEAP SORT: " << endl;
+        heap.print();
     }
 }
