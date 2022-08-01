@@ -1,17 +1,25 @@
 #include "movie.h"
 #include <iostream>
 
-Movie::Movie(int id, string title, float voteAverage)
+Movie::Movie(int id, string title, string release, float voteAverage)
 {
     this->id = id;
     this->title = title;
+    this->release = release;
     this->voteAverage = voteAverage;
 }
 
-// Prints the voting Average and the genres of the movie
+Movie& Movie::operator=(const Movie &m) {
+    id = m.id;
+    title = m.title;
+    release = m.release;
+    voteAverage = m.voteAverage;
+    return *this;
+}
+
 void Movie::printData()
 {
-    std::cout << title << " (" << voteAverage << ") " << "(";
+    std::cout << title << " (" << voteAverage << ") " << "(" << release << ") " << "(";
 
     for(int i = 0; i < genre.size(); ++i)
     {
@@ -22,4 +30,10 @@ void Movie::printData()
     }
 
     std::cout << ")\n";
+}
+
+// kylo
+float Movie::giveAverage()
+{
+    return voteAverage;
 }
