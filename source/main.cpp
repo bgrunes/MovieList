@@ -4,11 +4,12 @@
 #include <map>
 #include <chrono>
 #include "Map.h"
-#include "heap.h"
+#include "Heap.h"
 using namespace std;
 
 void mapGenres(std::map<string, int> &genres);
 void createSearch(int genreID);
+int searchResult(vector<float> vote_avg, float k);
 
 int main() {
     // Main menu:
@@ -44,16 +45,17 @@ int main() {
     std::map<string, int> genres;
     mapGenres(genres);
     std::map<string, int>::iterator it;
+    for (it = genres.begin(); it != genres.end(); it++)
+        std::cout << it->first << ", " << it->second << "\n";
+    
 
-    cout << "Welcome to MovieList!" << endl;
+    std::cout << "Welcome to MovieList!" << endl;
     
     // Describe what movie list is and does (?)
     while (true)
     {
-        cout << "Please choose a genre to search the top 10 movies or type \'exit\' to end the program.\n";
-
-        // FIXME: Change to vector<string> and loop print(?)
-        cout << "Genres:\nAction, Adventure, Animation, \nComedy, Crime, Documentary, \nDrama, Family, Fantasy, \nHistory, Horror, Music, \nMystery, Romance, Science Fiction, \nTV Movie, Thriller, War, Western\n";
+        std::cout << "Please choose a genre to search the top 10 movies or type \'exit\' to end the program.\n";
+        std::cout << "Genres:\nAction, Adventure, Animation, \nComedy, Crime, Documentary, \nDrama, Family, Fantasy, \nHistory, Horror, Music, \nMystery, Romance, Science Fiction, \nTV Movie, Thriller, War, Western\n";
 
         string genre;
         cin >> genre;
@@ -66,7 +68,7 @@ int main() {
             if (it != genres.end())
                 createSearch(genres[genre]);
             else
-                cout << "Incorrect genre name.\n";
+                std::cout << "Incorrect genre name.\n";
             
         }
     }
@@ -85,7 +87,7 @@ void mapGenres(std::map<string, int> &genres)
     gFile.open("data\\GENRE.csv");
 
     if (!gFile.is_open())
-        cout << "ERROR: GENRE.csv not found\n";
+        std::cout << "ERROR: GENRE.csv not found\n";
     else
     {
         string num;
@@ -101,10 +103,9 @@ void mapGenres(std::map<string, int> &genres)
             getline(gFile, num, ',');
             getline(gFile, genreID, ',');
             getline(gFile, genre, '\n');
-            //cout << num << ", " << genreID << ", " << genre << "\n";
+            //std::cout << num << ", " << genreID << ", " << genre << "\n";
 
             genres[genre] = stoi(genreID);
-            cout << "success!\n";
         }
 
     }
@@ -131,7 +132,7 @@ void createSearch(int genreID)
     mgFile.open("data\\MOVIE_GENRE.csv");
 
     if (!mgFile.is_open())
-        cout << "ERROR: MOVIE_GENRE.csv not found\n";
+        std::cout << "ERROR: MOVIE_GENRE.csv not found\n";
     else
     {
         getline(mgFile, num);
@@ -148,7 +149,7 @@ void createSearch(int genreID)
         // Test print the filmIds to make sure filestream is working
         /*for(int i = 0; i < filmId.size(); ++i)
         {
-            cout << filmId[i] << "\n";
+            std::cout << filmId[i] << "\n";
         }*/
     }
     mgFile.close();
@@ -161,7 +162,7 @@ void createSearch(int genreID)
     vector<float> voteAvg;
 
     if(!mFile.is_open())
-        cout << "ERROR: MOVIE.csv not found\n";
+        std::cout << "ERROR: MOVIE.csv not found\n";
     else
     {
         // Format of file is: ID,FILMID,TITLE,RELEASE,VOTE_AVERAGE,VOTE_COUNT
@@ -169,7 +170,6 @@ void createSearch(int genreID)
         getline(mFile, num);
         while (!mFile.eof())
         {
-            getline(mFile, num, ',');
             getline(mFile, fId, ',');
             getline(mFile, title, ',');
             getline(mFile, release, ',');
@@ -191,17 +191,61 @@ void createSearch(int genreID)
                 // Add the movie to the Movie List Map and the Movie List Heap
                 Movie movie = Movie(stoi(fId), title, release, stof(vote_avg));
                 list.insert(stof(vote_avg), movie);
-                voteAvg.push_back(stof(vote_avg));
                 
+                if (voteAvg.size() == 0)
+                    voteAvg.push_back(stof(vote_avg));
+                else
+                {
+                    if (searchResult(voteAvg, stof(vote_avg)) == -1)
+                        voteAvg.push_back(stof(vote_avg));
+                }
                 movieList.push_back(movie);
             }
         }
 
+        // Test print voteAvg vector
+        //for (float i : voteAvg)
+        //    std::cout << i << " ";
+
+        // Inserts movies into the heap and prints them out
         // Code by: Kylo
         for (int i = 0; i < movieList.size(); i++)
             heap.insert(movieList[i]);
 
-        cout << "HEAP SORT: " << endl;
+
+        std::cout << "HEAP SORT: " << endl;
+        auto t1 = chrono::high_resolution_clock::now();
         heap.print();
+        auto t2 = chrono::high_resolution_clock::now();
+        std::cout << "\n";
+        auto duration = chrono::duration_cast<chrono::microseconds>(t2-t1).count();
+        std::cout << "Task finished successfully in " << duration << " milliseconds!\n\n";
+
+        std::cout << "MAP PRINT: \n";
+        t1 = chrono::high_resolution_clock::now();
+        for (int i = 0; i < vote_avg.size(); i++)
+        {
+            cout << list[vote_avg[i]].size() << " ";
+            /*for (int j = 0; j < list[vote_avg[i]].size(); j++)
+            {
+                list[vote_avg[i]][j].printData();
+                std::cout << "\n";
+            }*/
+        }
+        t2 = chrono::high_resolution_clock::now();
+        duration = chrono::duration_cast<chrono::microseconds>(t2-t1).count();
+        std::cout << "Task finished successfully in " << duration << " milliseconds!\n\n";
     }
+}
+
+// Search to see if the vote average is in the vector. Return the index if found, otherwise -1
+int searchResult(vector<float> vote_avg, float k)
+{
+    for (int i = 0; i < vote_avg.size(); i++)
+    {
+        if (vote_avg[i] == k)
+            return i;
+    }
+
+    return -1;
 }
