@@ -8,7 +8,7 @@ using namespace std; //to determine however many 0's to print out if the int id 
 
 //***modeled RotateRight, RotateLeft, Insert, Remove, Pre/Post/Inorder traversal code off the corresponding lecture code****
 template <typename key, typename value>
-class map {
+class Map {
 public:
     struct Node {
         vector<value> movieList;
@@ -228,7 +228,7 @@ public:
         return root;
     }
 
-    ~map() { //Destructor since we use heap memory: just spam delete on the tree node until it becomes a nullptr
+    ~Map() { //Destructor since we use heap memory: just spam delete on the tree node until it becomes a nullptr
         while (treeRoot != nullptr)
             treeRoot = Remove(treeRoot, treeRoot->rating);
     }
@@ -239,15 +239,10 @@ public:
         treeRoot = BalanceSubTree(treeRoot,BalanceFactor(treeRoot)); //balancing the tree root just to double check
     }
     vector<value>& operator[](key movieRating) {
-        map::Node *node = nullptr;
-        vector<map::Node *> nodeCarrier;
+        Map::Node *node = nullptr;
+        vector<Map::Node *> nodeCarrier;
         nodeCarrier.push_back(node);
         searchRating(treeRoot, movieRating, nodeCarrier); //nodeCarrier, which is passed by reference, will contain a node =
-        if (nodeCarrier[0] != nullptr) //to the node of the id if the id is in the tree, will be nullptr if id doesn't exist
-            return nodeCarrier[0]->movieList; //if there are movies with the inputted rating
-        else {
-            vector<Movie> emptyVector;
-            return emptyVector;
-        }
+        return nodeCarrier[0]->movieList; //if there are movies with the inputted rating
     }
 };
