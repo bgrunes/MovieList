@@ -4,12 +4,12 @@
 #include <map>
 #include <queue>
 #include <sstream>
-#include "movie.h"
+#include "Movie.h"
 #include "Map.h"
 using namespace std;
 
 void mapGenres(std::map<string, string> &genres);
-void createSearch(string genreID);
+void createSearch(string genreID, Map<float, Movie> &list, vector<float> &voteAvg);
 
 int main() {
     // Main menu:
@@ -45,7 +45,9 @@ int main() {
     std::map<string, string> genres;
     mapGenres(genres);
 
-    map<int, Movie> list;
+    // List storing searched items
+    Map<float, Movie> list;
+    vector<float> voteAvg;
 
     cout << "Welcome to MovieList!" << endl;
     
@@ -64,7 +66,7 @@ int main() {
             break;
         else if (genre == "Action")
         {        
-            createSearch(genres[genre]);
+            createSearch(genres[genre], list, voteAvg);
         }
     }
 
@@ -109,20 +111,23 @@ void mapGenres(std::map<string, string> &genres)
 // Searches through MOVIE_GENRE.csv and MOVIE.csv to match the genre id to the film id then to the movie and its respective data
 // Uses filestreams to traverse the files
 // Code by: Brandon Grunes
-void createSearch(string genreID)
+void createSearch(string genreID, Map<float, Movie> &list, vector<float> voteAvg)
 {
     ifstream mgFile;
     ifstream mFile;
+    string num;
+    vector<string> filmId;
+    string fId;
+    string gId;
+    string title;
+    string vote_avg;
+
     mgFile.open("data\\MOVIE_GENRE.csv");
 
     if (!mgFile.is_open())
         cout << "ERROR: MOVIE_GENRE.csv not found\n";
     else
     {
-        string num;
-        vector<string> filmId;
-        string fId;
-        string gId;
         getline(mgFile, num);
         while (!mgFile.eof())
         {
@@ -148,13 +153,25 @@ void createSearch(string genreID)
     else
     {
         // Format of file is: ID,FILMID,TITLE,VOTE_AVERAGE
-        string id, fId, title, vote_avg;
-        getline(mFile, id);
+
+        getline(mFile, num);
         while (!mFile.eof())
         {
-            getline(mFile, id, ',');
+            getline(mFile, num, ',');
             getline(mFile, fId, ',');
-            
+            getline(mFile, title, ',');
+            getline(mFile, vote_avg, '\n');
+
+            for (int i = 0; i < filmId.size(); ++i)
+            {
+                if (filmId[0] == fId)
+                {
+                    Movie movie(stoi(fId), title, stof(vote_avg));
+                    movie.printData();
+                    list.insert(stof(vote_avg), movie);
+                    voteAvg.push_back(stof(vote_avg));
+                }
+            }
         }
     }
 }
