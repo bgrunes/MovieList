@@ -92,7 +92,7 @@ void mapGenres(std::map<string, int> &genres)
 {
     ifstream gFile;
 
-    gFile.open("data\\GENRE.csv");
+    gFile.open("GENRE.csv");
 
     if (!gFile.is_open())
         std::cout << "ERROR: GENRE.csv not found\n";
@@ -137,7 +137,7 @@ void createSearch(int genreID)
     string vote_avg;
     string vote_ct;
 
-    mgFile.open("data\\MOVIE_GENRE.csv");
+    mgFile.open("MOVIE_GENRE.csv");
 
     if (!mgFile.is_open())
         std::cout << "ERROR: MOVIE_GENRE.csv not found\n";
@@ -161,7 +161,7 @@ void createSearch(int genreID)
         }*/
     }
     mgFile.close();
-    mFile.open("data\\MOVIE.csv");
+    mFile.open("MOVIE.csv");
     
     vector<Movie> movieList;
     Heap heap;
